@@ -1,0 +1,61 @@
+{
+  "routing": {
+    "description": "Model routing for Kalki multi-agent system",
+    "phases": {
+      "phase1_algorithm_research": {
+        "name": "Algorithm Research & Trend Analysis",
+        "model": "gemini-2.5-pro",
+        "provider": "google",
+        "reason": "Gemini 2.5 Pro for large-context web research and trend analysis",
+        "fallback": "gemini-2.5-flash"
+      },
+      "phase2_scripting": {
+        "name": "Script & Story Generation",
+        "model": "gemini-2.5-pro",
+        "provider": "google",
+        "reason": "Gemini 2.5 Pro for high-quality narrative and emotional scripting",
+        "fallback": "gemini-2.5-flash"
+      },
+      "phase3_visual_direction": {
+        "name": "Visual Direction & Image Prompting",
+        "model": "gemini-2.5-pro",
+        "provider": "google",
+        "reason": "Gemini 2.5 Pro for detailed visual prompt engineering",
+        "fallback": "gemini-2.5-flash"
+      },
+      "phase4_orchestration": {
+        "name": "Director Agent / Orchestration",
+        "model": "gemini-2.5-pro",
+        "provider": "google",
+        "reason": "Gemini 2.5 Pro as primary Director for LangGraph state management",
+        "fallback": "gemini-2.5-flash"
+      },
+      "phase5_evasion_engine": {
+        "name": "Evasion Engine & Playwright Bypass",
+        "model": "gemini-2.5-flash",
+        "provider": "google",
+        "reason": "Reserved for Gemini only - to be implemented separately",
+        "status": "SKIPPED",
+        "note": "This phase is handled exclusively by Gemini when enabled"
+      }
+    },
+    "defaults": {
+      "coding": "gemini-2.5-pro",
+      "architecture": "gemini-2.5-pro",
+      "research": "gemini-2.5-flash",
+      "image_generation": "flux-1-dev",
+      "video_generation": "seedance-2.0"
+    }
+  },
+  "providers": {
+    "google": {
+      "models": ["gemini-2.5-pro", "gemini-2.5-flash", "gemini-2.0-flash"],
+      "envKey": "GOOGLE_GENERATIVE_AI_API_KEY"
+    },
+    "openai": {
+      "models": ["gpt-4o", "gpt-4o-mini"],
+      "envKey": "OPENAI_API_KEY",
+      "note": "Screenwriter fallback"
+    }
+  }
+}

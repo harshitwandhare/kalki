@@ -1,0 +1,20 @@
+#!/usr/bin/env sh
+# Kalki Pre-commit Hook
+
+# 1. Run lint-staged (ESLint + type-check on staged files)
+bunx lint-staged
+
+# 2. Secret leak scan — block commits containing hardcoded secrets
+STAGED=$(git diff --cached --name-only --diff-filter=ACM 2>/dev/null)
+
+if [ -n "$STAGED" ]; then
+  SECRET_PATTERNS='(sk-ant-api|sk-[a-zA-Z0-9]{40}|AKIA[A-Z0-9]{16}|AIzaSy[a-zA-Z0-9_-]{33}|ghp_[a-zA-Z0-9]{36}|r8_[a-zA-Z0-9]{40})'
+  FOUND=$(echo "$STAGED" | xargs grep -rlE "$SECRET_PATTERNS" 2>/dev/null | grep -v "node_modules" | grep -v ".example" | grep -v ".husky" || true)
+  if [ -n "$FOUND" ]; then
+    echo ""
+    echo "BLOCKED: Potential API keys/secrets detected in:"
+    echo "$FOUND"
+    echo "Use .env.local for secrets. Never commit API keys."
+    exit 1
+  fi
+fi

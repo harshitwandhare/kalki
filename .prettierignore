@@ -1,0 +1,5 @@
+.next
+node_modules
+src/generated
+bun.lock
+src/components/ui
