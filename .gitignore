@@ -46,3 +46,9 @@ tmp/
 .pm2/
 *.tsbuildinfo
 coverage/
+.claude/
+.taste-skill/
+.env
+/test-results/
+/playwright-report/
+.rec/
