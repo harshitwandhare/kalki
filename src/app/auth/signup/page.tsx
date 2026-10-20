@@ -61,9 +61,8 @@ export default function SignUpPage() {
       <Card className="w-full max-w-sm bg-zinc-900 border-zinc-800">
         <CardHeader className="text-center pb-2">
           <div className="flex justify-center mb-4">
-            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center text-xl font-bold text-white">
-              K
-            </div>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/logo.svg" alt="Kalki" width={48} height={48} />
           </div>
           <CardTitle className="text-white text-xl">Create Account</CardTitle>
           <p className="text-zinc-400 text-sm mt-1">

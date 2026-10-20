@@ -1,5 +1,5 @@
 <p align="center">
-  <img src=".github/assets/logo-3d.png" alt="Kalki emblem: three steel bars crossed by a gold third eye with a play-button pupil" width="180" />
+  <img src=".github/assets/logo.png" alt="Kalki logo: three horizontal lines crossed by an open eye" width="140" />
 </p>
 
 <h1 align="center">Kalki</h1>
@@ -170,7 +170,7 @@ Please report vulnerabilities privately. See [SECURITY.md](SECURITY.md).
 
 ## The name and the mark
 
-Kalki is the tenth avatar of Vishnu, who closes one age and opens the next. The mark borrows from Shiva: the three ash lines of the tripundra, crossed by the third eye. Its pupil is a play button, and the tip of Kalki's sword rises above it. The emblem is rendered with three.js by `scripts/logo-render.mjs`, and the flat mark by `scripts/logo.mjs`.
+Kalki is the tenth avatar of Vishnu, who closes one age and opens the next. The mark is three horizontal lines, after Shiva's tripundra, crossed by an open eye. Every logo file is generated from one definition in `scripts/logo.mjs` (`bun run logo`).
 
 ## License
 
