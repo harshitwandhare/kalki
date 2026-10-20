@@ -1,8 +1,6 @@
 <p align="center">
-  <img src=".github/assets/logo.png" alt="Kalki logo: three horizontal lines crossed by an open eye" width="140" />
+  <img src=".github/assets/banner.png" alt="Kalki logo, three horizontal lines crossed by an open eye, beside the wordmark Kalki" width="100%" />
 </p>
-
-<h1 align="center">Kalki</h1>
 
 <p align="center">
   <b>Open-source AI short-video studio. Five agents turn one line of text into a finished vertical video, with captions ready for every platform.</b>
@@ -169,6 +167,8 @@ scripts/                    setup, screenshots, logo rendering
 Please report vulnerabilities privately. See [SECURITY.md](SECURITY.md).
 
 ## The name and the mark
+
+<img src=".github/assets/logo.png" alt="The Kalki mark" width="96" align="right" />
 
 Kalki is the tenth avatar of Vishnu, who closes one age and opens the next. The mark is three horizontal lines, after Shiva's tripundra, crossed by an open eye. Every logo file is generated from one definition in `scripts/logo.mjs` (`bun run logo`).
 
