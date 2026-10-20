@@ -1,83 +1,72 @@
 // Builds every logo asset from one definition, then renders the PNGs.
-// The mark: Shiva's tripundra (three ash lines) crossed by the opened third
-// eye, a play triangle for its pupil, and the tip of Kalki's sword above.
+// The mark: three horizontal lines (Shiva's tripundra) crossed by one open eye.
 // Usage: node scripts/logo.mjs
 import { chromium } from "@playwright/test";
-import { copyFileSync, writeFileSync } from "fs";
+import { copyFileSync, readFileSync, writeFileSync } from "fs";
 
 const ORANGE = "#ff7a1f";
-const LIGHT = "#ffa25e";
-const MID = "#c9530f";
-const DEEP = "#9c3d0c";
 const INK = "#050f16";
 
-const EYE = "M32 8 C45.5 19 45.5 45 32 56 C18.5 45 18.5 19 32 8z";
-const IRIS = "M32 11.5 C42.6 21 42.6 43 32 52.5 C21.4 43 21.4 21 32 11.5z";
-const BLADE = "M32 0.5 L34.2 6.4 L32 8.6 L29.8 6.4z";
-const PUPIL = "M28.2 24.5v15l12.6-7.5z";
-const bars = (fill) =>
-  [19, 29.5, 40]
-    .map(
-      (y) =>
-        `<rect x="6" y="${y}" width="52" height="5.5" rx="2.75" fill="${fill}"/>`,
-    )
-    .join("");
-const silhouette = (fill) =>
-  `${bars(fill)}<path fill="${fill}" d="${EYE}"/><path fill="${fill}" d="${BLADE}"/>`;
+// A vesica (pointed oval) centred on x=32, as a cubic Bezier path.
+const vesica = (top, bottom, half) => {
+  const mid = (top + bottom) / 2;
+  const k = (bottom - top) * 0.32;
+  return `M32 ${top} C${32 + half} ${mid - k} ${32 + half} ${mid + k} 32 ${bottom} C${32 - half} ${mid + k} ${32 - half} ${mid - k} 32 ${top}Z`;
+};
 
-function face() {
+const EYE = vesica(9, 55, 15);
+const IRIS = vesica(14, 50, 10.5);
+const GAP = vesica(5, 59, 19.5);
+const LINES = [19.5, 29.5, 39.5];
+
+/** The mark on its own. `id` keeps mask ids unique when several marks share a page. */
+function mark(id = "k") {
+  const lines = LINES.map(
+    (y) => `<rect x="4" y="${y}" width="56" height="5" rx="2.5"/>`,
+  ).join("");
   return [
-    bars(ORANGE),
-    `<path fill="${ORANGE}" d="${EYE}"/>`,
-    `<path fill="${LIGHT}" d="${BLADE}"/>`,
-    `<path fill="${INK}" d="${IRIS}"/>`,
-    `<path transform="translate(0.9 0.9)" fill="${DEEP}" d="${PUPIL}"/>`,
-    `<path fill="${ORANGE}" d="${PUPIL}"/>`,
+    `<defs><mask id="${id}"><rect width="64" height="64" fill="#fff"/><path d="${GAP}" fill="#000"/></mask></defs>`,
+    `<g fill="${ORANGE}" mask="url(#${id})">${lines}</g>`,
+    `<path fill="${ORANGE}" fill-rule="evenodd" d="${EYE} ${IRIS}"/>`,
+    `<circle cx="32" cy="32" r="5.5" fill="${ORANGE}"/>`,
   ].join("");
 }
 
-// Flat-shaded extrusion: the silhouette stacked in fine steps toward the lower right.
-function mark3d() {
-  const layers = [];
-  for (let k = 60; k > 0; k--) {
-    const d = (k * 0.1).toFixed(1);
-    layers.push(
-      `<g transform="translate(${d} ${d})">${silhouette(k > 12 ? DEEP : MID)}</g>`,
-    );
-  }
-  return layers.join("") + face();
-}
+const svg = (viewBox, body, extra = "") =>
+  `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${viewBox}" role="img" aria-label="Kalki"${extra}>${body}</svg>\n`;
 
-const svg = (viewBox, body) =>
-  `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${viewBox}" role="img" aria-label="Kalki">${body}</svg>\n`;
-
-writeFileSync("public/logo.svg", svg("2 -1 60 62", face()));
-writeFileSync("public/logo-3d.svg", svg("2 -1 64 66", mark3d()));
-copyFileSync("public/logo-3d.svg", "src/app/icon.svg");
+// Transparent mark: site header, README.
+writeFileSync("public/logo.svg", svg("0 0 64 64", mark()));
+// App icon: the mark on an ink tile so it reads on any tab colour.
+writeFileSync(
+  "src/app/icon.svg",
+  svg(
+    "0 0 64 64",
+    `<rect width="64" height="64" rx="14" fill="${INK}"/><g transform="translate(6 6) scale(0.8125)">${mark("i")}</g>`,
+  ),
+);
+// README banner.
 writeFileSync(
   ".github/assets/banner.svg",
   `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 320" role="img" aria-label="Kalki, open-source AI short-video studio">
 <rect width="1280" height="320" fill="${INK}"/>
-<g transform="translate(96 44) scale(3.6)">${mark3d()}</g>
-<text x="372" y="178" fill="#f2f4f5" font-family="Schibsted Grotesk, Helvetica, Arial, sans-serif" font-weight="800" font-size="124" letter-spacing="-6">Kalki</text>
-<text x="376" y="234" fill="${ORANGE}" font-family="Schibsted Grotesk, Helvetica, Arial, sans-serif" font-weight="600" font-size="30">One line of text in. A finished vertical video out.</text>
+<g transform="translate(112 64) scale(3)">${mark("b")}</g>
+<text x="352" y="178" fill="#f2f4f5" font-family="Schibsted Grotesk, Helvetica, Arial, sans-serif" font-weight="800" font-size="124" letter-spacing="-6">Kalki</text>
+<text x="356" y="232" fill="${ORANGE}" font-family="Schibsted Grotesk, Helvetica, Arial, sans-serif" font-weight="600" font-size="30">One line of text in. A finished vertical video out.</text>
 </svg>
 `,
 );
 
 const browser = await chromium.launch();
 for (const [src, out, w, h, bg] of [
-  [
-    "public/logo-3d.svg",
-    ".github/assets/logo-3d.png",
-    1024,
-    1024,
-    "transparent",
-  ],
+  ["public/logo.svg", ".github/assets/logo.png", 512, 512, "transparent"],
+  ["src/app/icon.svg", "src/app/apple-icon.png", 180, 180, "transparent"],
   [".github/assets/banner.svg", ".github/assets/banner.png", 1280, 320, INK],
 ]) {
-  const page = await browser.newPage({ viewport: { width: w, height: h } });
-  const { readFileSync } = await import("fs");
+  const page = await browser.newPage({
+    viewport: { width: w, height: h },
+    deviceScaleFactor: out.endsWith("banner.png") ? 2 : 1,
+  });
   const markup = readFileSync(src, "utf8").replace(
     "<svg ",
     `<svg width="${w}" height="${h}" `,
@@ -89,4 +78,5 @@ for (const [src, out, w, h, bg] of [
   await page.screenshot({ path: out, omitBackground: bg === "transparent" });
 }
 await browser.close();
+copyFileSync(".github/assets/logo.png", "public/logo.png");
 console.log("logo assets written");

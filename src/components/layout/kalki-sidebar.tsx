@@ -64,9 +64,8 @@ export function KalkiSidebar() {
     <Sidebar className="bg-zinc-950 border-r border-zinc-800">
       <SidebarHeader className="px-4 py-4 border-b border-zinc-800">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center text-sm font-bold text-white">
-            K
-          </div>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/logo.svg" alt="Kalki" width={32} height={32} />
           <div>
             <div className="text-sm font-semibold text-white">Kalki</div>
             <div className="text-xs text-zinc-500">AI Video Studio</div>

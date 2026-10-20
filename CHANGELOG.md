@@ -4,6 +4,11 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Changed
+
+- Simpler logo: three lines crossed by an open eye, flat, used everywhere. The 3D
+  render and its script are gone.
+
 ## [0.3.0] - 2026-10-20
 
 ### Added

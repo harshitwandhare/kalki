@@ -7,7 +7,7 @@ export function SiteNav() {
     <header className="wrap nav">
       <Link href="/" className="brand" aria-label="Kalki home">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/logo-3d.svg" alt="" width={30} height={30} />
+        <img src="/logo.svg" alt="" width={30} height={30} />
         <span translate="no">Kalki</span>
       </Link>
       <ul>

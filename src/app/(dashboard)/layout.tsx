@@ -15,9 +15,8 @@ export default function DashboardLayout({
         <div className="flex items-center h-12 px-4 border-b border-zinc-800">
           <SidebarTrigger className="text-zinc-400 hover:text-white" />
           <div className="ml-4 flex items-center gap-2">
-            <div className="w-5 h-5 rounded-full bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center text-xs font-bold">
-              K
-            </div>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/logo.svg" alt="Kalki" width={20} height={20} />
             <span className="text-sm font-medium text-white">Kalki Studio</span>
           </div>
         </div>
