@@ -13,10 +13,29 @@ services:
       - kalki_pgdata:/var/lib/postgresql/data
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U kalki"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-kalki}"]
       interval: 10s
       timeout: 5s
       retries: 5
 
+  # The full studio in a container. Start with: --profile app up -d --build
+  app:
+    profiles: ["app"]
+    build:
+      context: ..
+    container_name: kalki_app
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    env_file: ../.env.local
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-kalki}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-kalki_db}
+    ports:
+      - "127.0.0.1:3000:3000"
+    volumes:
+      - kalki_media:/app/public/videos
+
 volumes:
   kalki_pgdata:
+  kalki_media:
