@@ -1,3 +1,4 @@
+import { guard } from "@/lib/api-auth";
 import { NextRequest, NextResponse } from "next/server";
 import { Prisma } from "@/generated/prisma/client";
 import { db } from "@/lib/prisma";
@@ -8,8 +9,10 @@ type RouteContext = { params: Promise<{ id: string }> };
 
 export async function GET(_req: NextRequest, { params }: RouteContext) {
   try {
+    const g = await guard("VIEWER");
+    if (!g.ok) return g.response;
     const { id: channelId } = await params;
-    const userId = (await db.user.findFirst())!.id;
+    const userId = g.session.user.id;
 
     const channel = await db.channel.findFirst({
       where: { id: channelId, userId },
@@ -44,8 +47,10 @@ export async function GET(_req: NextRequest, { params }: RouteContext) {
 
 export async function POST(req: NextRequest, { params }: RouteContext) {
   try {
+    const g = await guard("EDITOR");
+    if (!g.ok) return g.response;
     const { id: channelId } = await params;
-    const userId = (await db.user.findFirst())!.id;
+    const userId = g.session.user.id;
 
     const channel = await db.channel.findFirst({
       where: { id: channelId, userId },

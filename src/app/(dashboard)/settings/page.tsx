@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -35,35 +35,13 @@ type PipelineDefault = {
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
-const API_KEYS: ApiKeyEntry[] = [
-  {
-    label: "Anthropic API Key",
-    envKey: "ANTHROPIC_API_KEY",
-    configured: true,
-  },
-  {
-    label: "Google Generative AI Key",
-    envKey: "GOOGLE_GENERATIVE_AI_API_KEY",
-    configured: true,
-  },
-  {
-    label: "Replicate API Token",
-    envKey: "REPLICATE_API_TOKEN",
-    configured: false,
-    note: "Add to .env.local",
-  },
-  {
-    label: "ElevenLabs API Key",
-    envKey: "ELEVENLABS_API_KEY",
-    configured: false,
-    note: "Add to .env.local",
-  },
-  {
-    label: "Seedance API Key",
-    envKey: "SEEDANCE_API_KEY",
-    configured: false,
-    note: "Add to .env.local",
-  },
+const API_KEYS: Omit<ApiKeyEntry, "configured">[] = [
+  { label: "Google Gemini (required)", envKey: "GOOGLE_GENERATIVE_AI_API_KEY" },
+  { label: "Stability AI", envKey: "STABILITY_API_KEY" },
+  { label: "ElevenLabs", envKey: "ELEVENLABS_API_KEY" },
+  { label: "Seedance", envKey: "SEEDANCE_API_KEY" },
+  { label: "Kling", envKey: "KLING_API_KEY" },
+  { label: "WhatsApp webhook secret", envKey: "KALKI_WEBHOOK_SECRET" },
 ];
 
 const PIPELINE_DEFAULTS: PipelineDefault[] = [
@@ -309,6 +287,14 @@ function ChangePassword() {
 // ─── Main Page ────────────────────────────────────────────────────────────────
 
 export default function SettingsPage() {
+  const [keyStatus, setKeyStatus] = useState<Record<string, boolean>>({});
+  useEffect(() => {
+    fetch("/api/settings/providers")
+      .then((r) => (r.ok ? r.json() : {}))
+      .then(setKeyStatus)
+      .catch(() => setKeyStatus({}));
+  }, []);
+
   return (
     <div className="p-6 space-y-6 max-w-3xl">
       {/* Header */}
@@ -325,7 +311,11 @@ export default function SettingsPage() {
       {/* API Keys */}
       <Section icon={Key} title="API Keys">
         <div className="space-y-3">
-          {API_KEYS.map((entry) => (
+          {API_KEYS.map((base) => ({
+            ...base,
+            configured: !!keyStatus[base.envKey],
+            note: "Set in .env.local",
+          })).map((entry) => (
             <div
               key={entry.envKey}
               className="flex items-center justify-between gap-3"

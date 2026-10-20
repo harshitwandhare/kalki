@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextResponse, type NextRequest } from "next/server";
 import NextAuth from "next-auth";
 import { authConfig } from "@/lib/auth.config";
 
@@ -7,9 +7,15 @@ import { authConfig } from "@/lib/auth.config";
 
 const { auth } = NextAuth(authConfig);
 
-export default auth((req) => {
+const authProxy = auth((req) => {
   const { nextUrl } = req;
   const session = req.auth;
+  const path = nextUrl.pathname;
+
+  // Auth pages and API routes do their own checks.
+  if (path.startsWith("/auth") || path.startsWith("/api/")) {
+    return NextResponse.next();
+  }
 
   // Not authenticated → redirect to sign in
   if (!session) {
@@ -41,6 +47,26 @@ export default auth((req) => {
   return NextResponse.next();
 });
 
+export default function proxy(req: NextRequest, ctx: unknown) {
+  // Site-only deploys (the public landing page) have no database behind them.
+  // Checked before NextAuth, which rewrites the request origin to AUTH_URL.
+  if (process.env.KALKI_SITE_ONLY === "1") {
+    if (req.nextUrl.pathname.startsWith("/api/")) {
+      return NextResponse.json(
+        { error: "This deployment only serves the website." },
+        { status: 404 },
+      );
+    }
+    return NextResponse.redirect(new URL("/", req.url));
+  }
+  return (
+    authProxy as (
+      r: NextRequest,
+      c: unknown,
+    ) => ReturnType<typeof NextResponse.next>
+  )(req, ctx);
+}
+
 // ─── Route Matcher ────────────────────────────────────────────────────────────
 // Covers every URL served by the (dashboard) route group.
 // NOTE: (dashboard) is a layout group — it does NOT prefix URLs.
@@ -57,5 +83,7 @@ export const config = {
     "/admin/:path*",
     "/characters",
     "/worlds",
+    "/auth/:path*",
+    "/api/:path*",
   ],
 };

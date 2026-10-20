@@ -11,8 +11,9 @@ pgvector, LangGraph.js, NextAuth v5, Tailwind 4, shadcn/ui.
 
 - Import Prisma from `@/generated/prisma/client`, never `@prisma/client`.
 - Package manager is `bun`. Gate: `bun run check` and `bun run format:check`.
-- Every LLM call goes through `invokeWithFallback()` in `src/agents/director.ts`.
-- API routes export `dynamic = "force-dynamic"` and check roles with `src/lib/rbac.ts`.
+- Every LLM call goes through `invokeWithFallback()` in `src/agents/director.ts` (Gemini 2.5 Pro).
+- API routes guard access with `guard(role)` from `src/lib/api-auth.ts`.
+- API routes export `dynamic = "force-dynamic"` and never trust the client for roles.
 - Commits use Conventional Commits.
 
 ## Hard limits

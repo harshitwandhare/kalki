@@ -229,14 +229,20 @@ async function scriptNode(state: GraphState): Promise<Partial<GraphState>> {
   });
   emitSSEEvent(state.reelId, event);
 
-  // ── 1. Generate the reel script (Claude preferred, Gemini fallback) ────────
+  // ── 1. Generate the reel script at the length the user picked ─────────────
+  const reelRow = await db.reel.findUnique({
+    where: { id: state.reelId },
+    select: { duration: true },
+  });
+  const targetSeconds = reelRow?.duration ?? 60;
   const scriptContent = await invokeWithFallback(
     `You are the Screenwriter agent for Project Kalki.
-Generate a high-engagement YouTube Shorts script optimized for the algorithm.
+Generate a high-engagement vertical short-video script that works on YouTube Shorts, TikTok, Instagram and Facebook Reels.
 Return valid JSON only (no markdown fences) matching this shape:
 { "title": string, "hook": string, "scenes": [...], "emotionalTags": string[], "targetDuration": number, "audioStyle": string, "voiceoverScript": string }`,
     `Create a reel script for: "${state.prompt}"
 Language: ${state.language ?? "ENGLISH"}
+Target length: ${targetSeconds} seconds (set targetDuration to ${targetSeconds} and size the voiceover to fit)
 Requirements:
 - Hook grabs attention in under 2 seconds
 - Optimize for watch-time completion
@@ -259,11 +265,14 @@ Requirements:
       hook: state.prompt,
       scenes: [],
       emotionalTags: [],
-      targetDuration: 60,
+      targetDuration: targetSeconds,
       audioStyle: "upbeat",
       voiceoverScript: state.prompt,
     };
   }
+
+  // The user's choice wins over whatever length the model returned.
+  script.targetDuration = targetSeconds;
 
   // ── 2. Generate YouTube metadata ───────────────────────────────────────────
   let ytMetadata: YouTubeMetadata | undefined;

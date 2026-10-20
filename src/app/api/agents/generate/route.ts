@@ -1,11 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/prisma";
-import { runPipeline } from "@/agents/director";
+import { guard } from "@/lib/api-auth";
+import { startPipeline } from "@/services/pipeline-start";
 
 export const dynamic = "force-dynamic";
 
 export async function POST(req: NextRequest) {
   try {
+    const g = await guard("EDITOR");
+    if (!g.ok) return g.response;
     const body = await req.json();
     const {
       channelId,
@@ -36,16 +39,9 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: "Reel not found" }, { status: 404 });
       }
     } else {
-      const user = await db.user.findFirst();
-      if (!user) {
-        return NextResponse.json(
-          { error: "No user found in database" },
-          { status: 500 },
-        );
-      }
       const reel = await db.reel.create({
         data: {
-          userId: user.id,
+          userId: g.session.user.id,
           channelId,
           prompt,
           language: language ?? "ENGLISH",
@@ -58,27 +54,7 @@ export async function POST(req: NextRequest) {
       reelId = reel.id;
     }
 
-    // Run the pipeline asynchronously — response returns immediately
-    // SSE stream at /api/sse?reelId=<id> delivers real-time updates
-    setImmediate(async () => {
-      try {
-        await db.reel.update({
-          where: { id: reelId },
-          data: { status: "SCRIPTING" },
-        });
-
-        await runPipeline(reelId, channelId, prompt, style, language);
-      } catch (err) {
-        console.error("[generate] Pipeline error:", err);
-        await db.reel.update({
-          where: { id: reelId },
-          data: {
-            status: "FAILED",
-            pipelineState: { error: String(err) },
-          },
-        });
-      }
-    });
+    startPipeline({ reelId, channelId, prompt, style, language });
 
     return NextResponse.json({ reelId, status: "STARTED" });
   } catch (err) {

@@ -97,7 +97,7 @@ const AGENTS = [
   },
   {
     name: "Artist",
-    model: "flux-1-dev",
+    model: "stability-ai",
     description: "Generates scene images",
   },
   {
