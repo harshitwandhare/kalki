@@ -810,6 +810,8 @@ export default function GeneratePage() {
                         <option value="30">30 seconds</option>
                         <option value="45">45 seconds</option>
                         <option value="60">60 seconds</option>
+                        <option value="75">75 seconds</option>
+                        <option value="90">90 seconds</option>
                       </StyledSelect>
                     </div>
 

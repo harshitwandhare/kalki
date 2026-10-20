@@ -15,6 +15,7 @@ import {
   Loader2,
   Library,
 } from "lucide-react";
+import { buildCaption, PLATFORMS, type PlatformId } from "@/lib/platforms";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -137,43 +138,82 @@ function ReelCardSkeleton() {
   );
 }
 
-function CopyYtButton({ reel }: { reel: Reel }) {
+function PublishPanel({ reel }: { reel: Reel }) {
+  const [platformId, setPlatformId] = useState<PlatformId>("youtube");
   const [copied, setCopied] = useState(false);
+  const platform = PLATFORMS.find((p) => p.id === platformId)!;
+  const caption = buildCaption(platform, {
+    title: reel.ytTitle ?? reel.title,
+    description: reel.ytDescription,
+    tags: reel.ytTags,
+  });
 
   const handleCopy = async () => {
-    const text = [
-      reel.ytTitle ? `Title: ${reel.ytTitle}` : null,
-      reel.ytDescription ? `\nDescription:\n${reel.ytDescription}` : null,
-      reel.ytTags.length > 0 ? `\nTags: ${reel.ytTags.join(", ")}` : null,
-    ]
-      .filter(Boolean)
-      .join("\n");
+    const text = caption.title
+      ? `${caption.title}
+
+${caption.caption}`
+      : caption.caption;
     try {
       await navigator.clipboard.writeText(text);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch {
-      // silently fail
+      // Clipboard blocked: the caption is still shown below to select by hand.
     }
   };
 
   return (
-    <button
-      onClick={handleCopy}
-      className="inline-flex items-center gap-1.5 text-xs px-2.5 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 hover:text-white transition-colors border border-zinc-700 hover:border-zinc-600"
-    >
-      {copied ? (
-        <>
-          <Check className="w-3 h-3 text-emerald-400" />
-          <span className="text-emerald-400">Copied!</span>
-        </>
-      ) : (
-        <>
-          <Copy className="w-3 h-3" />
-          Copy YT Data
-        </>
-      )}
-    </button>
+    <div className="w-full space-y-2">
+      <div className="flex flex-wrap items-center gap-2">
+        <select
+          aria-label="Publish to"
+          value={platformId}
+          onChange={(e) => setPlatformId(e.target.value as PlatformId)}
+          className="text-xs px-2 py-1.5 rounded-lg bg-zinc-800 text-zinc-200 border border-zinc-700"
+        >
+          {PLATFORMS.map((p) => (
+            <option key={p.id} value={p.id}>
+              {p.name}
+            </option>
+          ))}
+        </select>
+        <button
+          onClick={handleCopy}
+          className="inline-flex items-center gap-1.5 text-xs px-2.5 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 hover:text-white transition-colors border border-zinc-700 hover:border-zinc-600"
+        >
+          {copied ? (
+            <>
+              <Check className="w-3 h-3 text-emerald-400" />
+              <span className="text-emerald-400">Copied</span>
+            </>
+          ) : (
+            <>
+              <Copy className="w-3 h-3" />
+              Copy caption
+            </>
+          )}
+        </button>
+        {reel.videoUrl && (
+          <a
+            href={reel.videoUrl}
+            download
+            className="text-xs px-2.5 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 border border-zinc-700"
+          >
+            Download MP4
+          </a>
+        )}
+        <a
+          href={platform.uploadUrl}
+          target="_blank"
+          rel="noreferrer"
+          className="text-xs px-2.5 py-1.5 rounded-lg bg-orange-600 hover:bg-orange-500 text-white"
+        >
+          Open {platform.name}
+        </a>
+      </div>
+      <p className="text-[11px] text-zinc-500">{platform.disclosure}</p>
+    </div>
   );
 }
 
@@ -238,7 +278,7 @@ function ReelCard({ reel }: { reel: Reel }) {
             <Clock className="w-3 h-3" />
             {timeAgo(reel.createdAt)}
           </div>
-          {reel.status === "READY" && <CopyYtButton reel={reel} />}
+          {reel.status === "READY" && <PublishPanel reel={reel} />}
         </div>
       </div>
     </div>

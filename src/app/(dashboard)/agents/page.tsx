@@ -67,7 +67,7 @@ const AGENT_CONFIG: Record<
   },
   ARTIST: {
     label: "Artist",
-    model: "flux-1.1-pro",
+    model: "stability-ai",
     icon: Palette,
     color: "text-purple-400",
     bg: "bg-purple-500/10",
