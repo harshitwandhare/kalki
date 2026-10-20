@@ -175,23 +175,20 @@ export function CopyButton({ text }: { text: string }) {
 /** The hero recording: muted loop, paused for reduced motion, with a pause control. */
 export function HeroVideo() {
   const ref = useRef<HTMLVideoElement>(null);
-  const [playing, setPlaying] = useState(true);
+  // Mirrors the element's real state; autoplay can be refused by the browser.
+  const [playing, setPlaying] = useState(false);
   useEffect(() => {
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      ref.current?.pause();
-      setPlaying(false);
-    }
+    const v = ref.current;
+    if (!v) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches)
+      v.pause();
+    setPlaying(!v.paused);
   }, []);
   const toggle = () => {
     const v = ref.current;
     if (!v) return;
-    if (v.paused) {
-      void v.play();
-      setPlaying(true);
-    } else {
-      v.pause();
-      setPlaying(false);
-    }
+    if (v.paused) v.play().catch(() => setPlaying(false));
+    else v.pause();
   };
   return (
     <div className="hero-video">
@@ -206,6 +203,8 @@ export function HeroVideo() {
         muted
         loop
         playsInline
+        onPlay={() => setPlaying(true)}
+        onPause={() => setPlaying(false)}
         aria-label="Screen recording of the Kalki dashboard: overview, writing a prompt on Generate, then channels, characters, worlds and the agent monitor"
       />
       <button type="button" className="btn vid-toggle" onClick={toggle}>
