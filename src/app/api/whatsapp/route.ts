@@ -1,6 +1,7 @@
 import { timingSafeEqual } from "crypto";
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/prisma";
+import { startPipeline } from "@/services/pipeline-start";
 
 export const dynamic = "force-dynamic";
 
@@ -92,9 +93,11 @@ async function handleCommand(cmd: ParsedCommand): Promise<string> {
         channelId = ch.id;
       }
 
+      const owner = await db.user.findFirst({ where: { role: "OWNER" } });
+      if (!owner) return "No owner account exists yet.";
       const reel = await db.reel.create({
         data: {
-          userId: (await db.user.findFirst())!.id,
+          userId: owner.id,
           channelId,
           prompt: cmd.prompt!,
           status: "PENDING",
@@ -102,16 +105,7 @@ async function handleCommand(cmd: ParsedCommand): Promise<string> {
         include: { channel: true },
       });
 
-      // Trigger pipeline async
-      fetch(`${BASE_URL}/api/agents/generate`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          channelId,
-          prompt: cmd.prompt,
-          reelId: reel.id,
-        }),
-      }).catch(console.error);
+      startPipeline({ reelId: reel.id, channelId, prompt: cmd.prompt! });
 
       return `🎬 *Reel started!*\n\nPrompt: ${cmd.prompt}\nChannel: ${reel.channel.name}\nID: \`${reel.id.slice(0, 8)}\`\n\nI'll message you when it's ready. Track at:\n${BASE_URL}/dashboard`;
     }

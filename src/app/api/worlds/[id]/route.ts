@@ -1,3 +1,4 @@
+import { guard } from "@/lib/api-auth";
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/prisma";
 
@@ -7,6 +8,8 @@ type RouteContext = { params: Promise<{ id: string }> };
 
 export async function PATCH(req: NextRequest, { params }: RouteContext) {
   try {
+    const g = await guard("EDITOR");
+    if (!g.ok) return g.response;
     const { id } = await params;
     const body = (await req.json()) as { referenceUrls?: string[] };
 

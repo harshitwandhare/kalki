@@ -1,3 +1,4 @@
+import { guard } from "@/lib/api-auth";
 import { NextRequest, NextResponse } from "next/server";
 import { generateEmbedding, searchSimilarWorlds } from "@/services/embed";
 
@@ -9,6 +10,8 @@ export const dynamic = "force-dynamic";
  */
 export async function GET(req: NextRequest) {
   try {
+    const g = await guard("VIEWER");
+    if (!g.ok) return g.response;
     const { searchParams } = new URL(req.url);
     const prompt = searchParams.get("prompt");
     const channelId = searchParams.get("channelId");
