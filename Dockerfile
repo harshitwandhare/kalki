@@ -23,8 +23,8 @@ RUN apt-get update \
  && apt-get install -y --no-install-recommends ffmpeg \
  && rm -rf /var/lib/apt/lists/*
 ENV NODE_ENV=production NEXT_TELEMETRY_DISABLED=1 PORT=3000
-COPY --from=build /app ./
-RUN mkdir -p public/videos public/images public/audio && chown -R node:node public
+COPY --from=build --chown=node:node /app ./
 USER node
+RUN mkdir -p public/videos public/images public/audio
 EXPOSE 3000
 CMD ["sh", "-c", "bunx prisma migrate deploy && bun run start"]
