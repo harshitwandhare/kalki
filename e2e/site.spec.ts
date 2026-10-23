@@ -150,3 +150,52 @@ test("skip link jumps to the content", async ({ page }) => {
     page.getByRole("link", { name: "Skip to content" }),
   ).toBeFocused();
 });
+
+// A section is "blank" when it is on screen or already scrolled past but still hidden.
+const hiddenAboveFold = (page: import("@playwright/test").Page) =>
+  page.evaluate(() =>
+    Array.from(document.querySelectorAll<HTMLElement>(".rise:not(.in)"))
+      .filter((el) => el.getBoundingClientRect().top < window.innerHeight)
+      .map((el) => el.textContent?.trim().slice(0, 40) ?? "(image)"),
+  );
+
+test("jumping to a section from a hero folder leaves nothing blank", async ({
+  page,
+}) => {
+  await page.goto("/");
+  await page.locator(".stack a.folder").first().click();
+  await page.waitForTimeout(900);
+  expect(await hiddenAboveFold(page)).toEqual([]);
+  // Jump straight to the bottom, then back up: nothing skipped may stay hidden.
+  await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+  await page.waitForTimeout(900);
+  expect(await hiddenAboveFold(page)).toEqual([]);
+  await page.evaluate(() => window.scrollTo(0, 0));
+  await page.waitForTimeout(900);
+  expect(await hiddenAboveFold(page)).toEqual([]);
+});
+
+test("coming back to the home page from the docs renders every section", async ({
+  page,
+}) => {
+  await page.goto("/docs/api");
+  await page.locator("header.nav .brand").click();
+  await expect(page).toHaveURL(/\/$/);
+  await page.waitForTimeout(900);
+  expect(await hiddenAboveFold(page)).toEqual([]);
+  await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+  await page.waitForTimeout(900);
+  expect(await hiddenAboveFold(page)).toEqual([]);
+});
+
+test("navigating docs to a home anchor shows the target section", async ({
+  page,
+}) => {
+  await page.goto("/docs/api");
+  // The footer link exists on phones too, where the header links are hidden.
+  await page.locator('footer a[href="/#pipeline"]').click();
+  await expect(page).toHaveURL(/#pipeline$/);
+  await page.waitForTimeout(900);
+  expect(await hiddenAboveFold(page)).toEqual([]);
+  await expect(page.locator("#pipeline .seg").first()).toBeVisible();
+});

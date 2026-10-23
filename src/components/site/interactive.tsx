@@ -1,31 +1,52 @@
 "use client";
 
+import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { channels, tour } from "./content";
 
-/** Adds `.in` to every `.rise` element as it scrolls into view. Content stays visible without JS. */
+/**
+ * Adds `.in` to every `.rise` element once it is on screen or already behind the reader.
+ *
+ * An IntersectionObserver is not enough here. It only reports threshold crossings, so an
+ * anchor jump or a scrollTo that lands past an element never fires for it, and the element
+ * stays hidden for good. Elements also appear after mount when the layout is kept across
+ * client navigation (docs to home). So the check is a plain sweep over whatever is still
+ * hidden, run on scroll, resize, hash changes and every route change.
+ * Content stays visible without JS (the `js` class is what hides it).
+ */
 export function Reveal() {
+  const pathname = usePathname();
+
   useEffect(() => {
     document.documentElement.classList.add("js");
-    const els = Array.from(document.querySelectorAll<HTMLElement>(".rise"));
-    const io = new IntersectionObserver(
-      (entries) => {
-        for (const e of entries) {
-          if (e.isIntersecting) {
-            e.target.classList.add("in");
-            io.unobserve(e.target);
-          }
-        }
-      },
-      { rootMargin: "0px 0px -8% 0px" },
-    );
-    for (const el of els) {
-      if (el.getBoundingClientRect().top < window.innerHeight)
-        el.classList.add("in");
-      else io.observe(el);
-    }
-    return () => io.disconnect();
-  }, []);
+    let frame = 0;
+
+    const sweep = () => {
+      frame = 0;
+      const limit = window.innerHeight * 0.92;
+      document.querySelectorAll<HTMLElement>(".rise:not(.in)").forEach((el) => {
+        if (el.getBoundingClientRect().top < limit) el.classList.add("in");
+      });
+    };
+    const schedule = () => {
+      if (!frame) frame = requestAnimationFrame(sweep);
+    };
+
+    sweep();
+    // Hash navigation scrolls after the route renders, so look again shortly after.
+    const timers = [120, 400, 1000].map((ms) => setTimeout(sweep, ms));
+    window.addEventListener("scroll", schedule, { passive: true });
+    window.addEventListener("resize", schedule);
+    window.addEventListener("hashchange", schedule);
+    return () => {
+      timers.forEach(clearTimeout);
+      if (frame) cancelAnimationFrame(frame);
+      window.removeEventListener("scroll", schedule);
+      window.removeEventListener("resize", schedule);
+      window.removeEventListener("hashchange", schedule);
+    };
+  }, [pathname]);
+
   return null;
 }
 
