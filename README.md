@@ -116,8 +116,6 @@ If you want the channel to earn, read [docs/earning.md](docs/earning.md) before 
 - Turn on each platform's AI disclosure when you post. The Library tells you where it is.
 - Don't impersonate real people or use anyone's likeness without consent.
 
-`tests/policy.test.ts` fails the build if account-farming or metadata-stripping code comes back. More in [docs/responsible-use.md](docs/responsible-use.md).
-
 ## Documentation
 
 | Guide                                       | What it covers                                             |
