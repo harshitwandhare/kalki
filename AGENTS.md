@@ -18,6 +18,6 @@ pgvector, LangGraph.js, NextAuth v5, Tailwind 4, shadcn/ui.
 
 ## Hard limits
 
-Do not add: account-creation or CAPTCHA/bot-evasion automation, stripping or faking
-of provenance metadata, shell execution from request input, or committed secrets or
+Do not add: automated sign-ups or anything that works around a provider's terms, removing or faking
+provenance metadata, shell execution from request input, or committed secrets or
 personal data. `tests/policy.test.ts` guards some of these.

@@ -27,8 +27,8 @@ All of it must pass before you open a PR; CI runs the same commands.
 
 Contributions will not be merged if they add:
 
-- automation that creates accounts, evades bot detection or CAPTCHAs, or otherwise
-  works around a provider's terms of service
+- automation that signs up for accounts or otherwise works around a provider's terms
+  of service
 - code that strips or forges provenance or AI-disclosure metadata
 - anything that executes shell commands from network input
 

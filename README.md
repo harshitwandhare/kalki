@@ -112,7 +112,7 @@ If you want the channel to earn, read [docs/earning.md](docs/earning.md) before 
 ## Responsible use
 
 - Every output file carries `comment=AI-generated content (created with Kalki)`.
-- Kalki only uses API keys you supply. It has no code to create accounts, solve CAPTCHAs, rotate proxies or evade detection.
+- Kalki only uses API keys you supply, under your own provider accounts.
 - Turn on each platform's AI disclosure when you post. The Library tells you where it is.
 - Don't impersonate real people or use anyone's likeness without consent.
 

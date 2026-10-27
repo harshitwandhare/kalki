@@ -54,10 +54,9 @@ First public release.
 
 ### Removed
 
-- Free-tier account "farming" (disposable email, CAPTCHA solving, stealth browser,
-  proxy rotation) and the `BYPASS_MODE` switch. Kalki now only uses keys you supply.
-- The "evasion engine": metadata stripping, fake device metadata and camera-grain
-  effects meant to avoid AI-content detection.
+- Early prototype code that worked around provider sign-up and content-labelling rules,
+  and the `BYPASS_MODE` switch. Kalki now only uses keys you supply and keeps every
+  output labelled as AI-generated.
 - WhatsApp shell commands (`build`, `deploy`, `commit`, `push`, `pull`, `logs`).
 - Personal paths, phone numbers and the hard-coded seed password.
 
