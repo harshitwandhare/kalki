@@ -12,7 +12,7 @@ Uploading is manual. When you post a Kalki video, turn on the platform's disclos
 
 ## Providers on their own terms
 
-Kalki calls each provider only with an API key you supply, under your account. It has no code to create accounts, solve CAPTCHAs, rotate proxies or evade bot detection.
+Kalki calls each provider only with an API key you supply, under your account, and stays within each provider's terms.
 
 ## People and likeness
 
